@@ -76,13 +76,9 @@ The prompt also explicitly instructs the model to:
 
 This directly targets the assessment's **summary quality** and **prompt effectiveness** criteria.
 
-## Why fake speaker labels were removed
+## Transcript format
 
-The previous implementation assigned `Speaker 1`, `Speaker 2`, etc. by alternating transcript segments. That creates false information because Whisper transcription alone does not establish speaker identity.
-
-The improved build stores `speaker: null` unless the configured transcription provider actually supplies a speaker label. Diarization remains an extension point rather than fabricated data.
-
-Groq's Whisper-compatible transcription endpoint is used for timestamped segments; diarization is intentionally not enabled for this assessment because it is outside the required scope.
+Whisper produces timestamped text segments. Speaker diarization is outside the scope of this build, so transcripts contain only `start`, `end`, and `text` fields.
 
 ## Project structure
 
@@ -103,7 +99,6 @@ meeting_summarizer/
 │       ├── asr/
 │       │   ├── base.py
 │       │   └── whisper.py
-│       ├── diarization/
 │       ├── llm/
 │       │   ├── base.py
 │       │   └── provider.py

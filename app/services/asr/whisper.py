@@ -26,7 +26,7 @@ class WhisperASR(ASRProvider):
         provider = settings.ASR_PROVIDER.lower()
         if provider == "mock":
             return [
-                {"start": 0.0, "end": 2.0, "text": "This is a mock transcript for local testing.", "speaker": None}
+                {"start": 0.0, "end": 2.0, "text": "This is a mock transcript for local testing."}
             ]
         if provider != "groq_whisper":
             raise ValueError(f"Unsupported ASR_PROVIDER: {settings.ASR_PROVIDER}")
@@ -104,7 +104,7 @@ class WhisperASR(ASRProvider):
 
         if not raw_segments:
             text = str(self._value(response, "text", "") or "").strip()
-            return [{"start": 0.0, "end": 0.0, "text": text, "speaker": None}] if text else []
+            return [{"start": 0.0, "end": 0.0, "text": text}] if text else []
 
         normalized = []
         for segment in raw_segments:
@@ -116,8 +116,6 @@ class WhisperASR(ASRProvider):
                     "start": round(float(self._value(segment, "start", 0.0) or 0.0), 3),
                     "end": round(float(self._value(segment, "end", 0.0) or 0.0), 3),
                     "text": text,
-                    # Do not fabricate speaker identities. Diarization is a separate concern.
-                    "speaker": self._value(segment, "speaker", None),
                 }
             )
         return normalized

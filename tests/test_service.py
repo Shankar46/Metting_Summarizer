@@ -8,7 +8,7 @@ from app.services.meeting_service import MeetingService
 
 class FakeASR:
     async def transcribe(self, audio_path):
-        return [{"start": 0.0, "end": 2.0, "text": "We will ship Friday.", "speaker": None}]
+        return [{"start": 0.0, "end": 2.0, "text": "We will ship Friday."}]
 
 
 class FakeLLM:

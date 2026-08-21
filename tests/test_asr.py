@@ -10,10 +10,10 @@ from app.services.asr.whisper import WhisperASR
 
 @pytest.mark.asyncio
 @patch("app.services.asr.whisper.settings")
-async def test_mock_asr_does_not_fabricate_speakers(mock_settings):
+async def test_mock_asr_returns_plain_transcript_segments(mock_settings):
     mock_settings.ASR_PROVIDER = "mock"
     segments = await WhisperASR().transcribe("unused.wav")
-    assert segments[0]["speaker"] is None
+    assert segments == [{"start": 0.0, "end": 2.0, "text": "This is a mock transcript for local testing."}]
 
 
 @pytest.mark.asyncio
@@ -35,4 +35,4 @@ async def test_api_segments_are_normalized(mock_settings):
     with patch.dict(sys.modules, {"openai": fake_openai}), patch("builtins.open", MagicMock()):
         result = await WhisperASR()._api_transcribe("audio.wav")
 
-    assert result == [{"start": 1.25, "end": 3.5, "text": "Hello there", "speaker": None}]
+    assert result == [{"start": 1.25, "end": 3.5, "text": "Hello there"}]

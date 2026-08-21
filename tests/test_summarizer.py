@@ -37,7 +37,7 @@ async def test_summarizer_returns_validated_result():
     )
     summarizer = MeetingSummarizer(llm)
     result = await summarizer.summarize(
-        [{"speaker": "Asha", "start": 0, "end": 3, "text": "Let's ship on Friday. I will prepare the release."}]
+        [{"start": 0, "end": 3, "text": "Let's ship on Friday. I will prepare the release."}]
     )
 
     assert isinstance(result, MeetingResult)
@@ -65,7 +65,7 @@ async def test_long_transcript_is_chunked(monkeypatch):
     llm = MockLLM(payload)
     summarizer = MeetingSummarizer(llm)
     transcript = [
-        {"speaker": "A", "start": i, "end": i + 1, "text": "A long sentence that consumes space."}
+        {"start": i, "end": i + 1, "text": "A long sentence that consumes space."}
         for i in range(8)
     ]
     result = await summarizer.summarize(transcript)

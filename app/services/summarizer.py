@@ -79,11 +79,10 @@ class MeetingSummarizer:
     def _format_transcript(transcript: list[dict[str, Any]]) -> str:
         lines = []
         for segment in transcript:
-            speaker = segment.get("speaker") or "Speaker"
             start = float(segment.get("start") or 0)
             text = str(segment.get("text") or "").strip()
             if text:
-                lines.append(f"[{int(start // 60):02d}:{int(start % 60):02d}] {speaker}: {text}")
+                lines.append(f"[{int(start // 60):02d}:{int(start % 60):02d}] {text}")
         return "\n".join(lines)
 
     @staticmethod

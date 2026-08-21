@@ -34,7 +34,6 @@ st.markdown(
 .decision { padding:.75rem .9rem; border-left:3px solid #6b7280; background:var(--soft); border-radius:0 10px 10px 0; margin:.55rem 0; }
 .action { border:1px solid var(--line); border-radius:12px; padding:.85rem; margin:.55rem 0; background:#fff; }
 .transcript { border-bottom:1px solid var(--line); padding:.75rem 0; }
-.speaker { font-weight:700; color:var(--ink); }
 .time { color:var(--muted); font-size:.78rem; margin-left:.5rem; }
 .small { color:var(--muted); font-size:.86rem; }
 </style>
@@ -220,15 +219,14 @@ if status == "completed":
         for segment in transcript:
             start = float(segment.get("start") or 0)
             timestamp = f"{int(start // 60):02d}:{int(start % 60):02d}"
-            speaker = segment.get("speaker") or "Speaker"
             st.markdown(
-                f'<div class="transcript"><span class="speaker">{speaker}</span>'
-                f'<span class="time">{timestamp}</span><br>{segment.get("text", "")}</div>',
+                f'<div class="transcript"><span class="time">{timestamp}</span><br>'
+                f'{segment.get("text", "")}</div>',
                 unsafe_allow_html=True,
             )
 
         raw_text = "\n".join(
-            f"{s.get('speaker') or 'Speaker'}: {s.get('text', '')}" for s in meeting.get("transcript_json") or []
+            s.get("text", "") for s in meeting.get("transcript_json") or []
         )
         st.download_button("Download transcript", raw_text, file_name=f"meeting_{meeting['id']}_transcript.txt")
 
