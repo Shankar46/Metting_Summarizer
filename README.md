@@ -78,7 +78,7 @@ This directly targets the assessment's **summary quality** and **prompt effectiv
 
 ## Transcript format
 
-Whisper produces timestamped text segments. Speaker diarization is outside the scope of this build, so transcripts contain only `start`, `end`, and `text` fields.
+Whisper produces timestamped text segments. Speaker identity is not inferred, so transcript segments use `speaker: null` unless the transcription provider supplies a label.
 
 ## Project structure
 
