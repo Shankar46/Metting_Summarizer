@@ -8,7 +8,7 @@ IMPORTANT:
 The transcript is the ONLY source of truth.
 Do not use outside knowledge.
 Do not infer missing information.
-Do not guess what the speakers intended.
+Do not guess what any person intended.
 
 ==================================================
 1. GENERAL GROUNDING RULES
@@ -30,8 +30,10 @@ Do not guess what the speakers intended.
    - outcomes
 
 3. Preserve names, dates, numbers, terminology, and important wording accurately.
+  Preserve technical terms exactly. For example, use "anti-abuse" when that
+  is what the transcript says; do not rewrite it as "NT abuse".
 
-4. If information is not present, use null where the schema allows null.
+4. If information is not present, use the exact default required by the schema.
 
 5. If a list category has no valid items, return [].
 
@@ -73,7 +75,7 @@ Every key decision MUST be an OBJECT, never a plain string.
 
 Correct:
 {
-  "decision": "The team approved the May release."
+  "description": "The team approved the May release."
 }
 
 Incorrect:
@@ -95,7 +97,7 @@ This should become:
 {
   "task": "Prepare the report.",
   "owner": "Jay",
-  "deadline": null,
+  "deadline": "Not specified",
   "priority": "not_specified"
 }
 
@@ -141,10 +143,10 @@ Examples:
 -> owner = "Sarah"
 
 "Someone should review the document."
--> owner = null
+-> owner = "Unassigned"
 
 "The team should review the document."
--> owner = null
+-> owner = "Unassigned"
 
 Do not infer the owner from:
 - who was speaking
@@ -177,7 +179,7 @@ If the transcript says:
 
 Then:
 
-"deadline": null
+"deadline": "Not specified"
 
 Do not invent a date from relative language.
 
@@ -329,7 +331,7 @@ If there are no open questions:
 Final rule:
 
 WHEN IN DOUBT, DO NOT GUESS.
-USE null OR "not_specified" OR [] ACCORDING TO THE SCHEMA.
+USE "Unassigned", "Not specified", "not_specified", OR [] ACCORDING TO THE SCHEMA.
 """
 
 
@@ -364,12 +366,12 @@ Before producing the JSON, verify:
   - priority = high/medium/low ONLY if explicitly stated
   - otherwise priority = "not_specified"
 5. A deadline must never be used to infer priority.
-6. A speaker must never automatically become the owner.
+6. A person must never automatically become the owner.
 7. Suggestions and discussions must not become decisions or actions
   unless the transcript confirms them.
 8. Unresolved questions must remain open_questions.
-9. Missing information must be null or "not_specified", depending
-  on the schema.
+9. Missing owner must be "Unassigned". Missing deadline must be
+  "Not specified". Missing priority must be "not_specified".
 10. Do not add facts that are not present in the transcript.
 
 Return ONLY the JSON object matching the supplied schema."""

@@ -54,6 +54,65 @@ async def test_empty_transcript_is_rejected():
 
 
 @pytest.mark.asyncio
+async def test_groq_provider_falls_back_to_prompt_json_after_json_object_failure(monkeypatch):
+    import openai
+    import app.services.llm.provider as provider_module
+
+    calls = []
+
+    class FakeAPIStatusError(Exception):
+        def __init__(self, body, status_code=400):
+            self.body = body
+            self.status_code = status_code
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            calls.append(kwargs.get("response_format"))
+            if len(calls) == 1:
+                raise FakeAPIStatusError({"error": {"code": "json_validate_failed"}})
+            return type(
+                "Response",
+                (),
+                {"choices": [type("Choice", (), {"message": type("Message", (), {"content": '{"summary":"ok","key_decisions":[],"action_items":[],"open_questions":[]}'} )()})()]},
+            )()
+
+    class FakeOpenAI:
+        def __init__(self, **kwargs):
+            self.chat = type("Chat", (), {"completions": FakeCompletions()})()
+
+    monkeypatch.setattr(provider_module, "settings", type("Settings", (), {"GROQ_API_KEY": "key", "LLM_MODEL": "test-model", "LLM_MAX_ATTEMPTS": 3, "LLM_MAX_RATE_LIMIT_WAIT_SECONDS": 15})())
+    monkeypatch.setattr(provider_module, "asyncio", type("AsyncioStub", (), {"to_thread": staticmethod(lambda fn: fn())})())
+    monkeypatch.setattr(openai, "OpenAI", FakeOpenAI)
+    monkeypatch.setattr(openai, "APIStatusError", FakeAPIStatusError)
+    monkeypatch.setattr(openai, "RateLimitError", type("RateLimitError", (Exception,), {}))
+
+    result = await provider_module.GroqProvider().generate("system", "user", {"type": "object"})
+    assert calls == [{"type": "json_object"}, None]
+    assert result.startswith("{\"summary\":\"ok\"")
+
+
+def test_response_normalizes_missing_action_fields_and_ignores_casual_questions():
+    normalized = MeetingSummarizer._normalize_response(
+        {
+            "summary": "A summary.",
+            "key_decisions": [],
+            "action_items": [{"task": "Follow up on anti-abuse notes", "owner": None}],
+            "open_questions": [{"question": "Is there another tea color?"}],
+        }
+    )
+
+    assert normalized["action_items"] == [
+        {
+            "task": "Follow up on anti-abuse notes",
+            "owner": "Unassigned",
+            "deadline": "Not specified",
+            "priority": "not_specified",
+        }
+    ]
+    assert normalized["open_questions"] == []
+
+
+@pytest.mark.asyncio
 async def test_long_transcript_is_chunked(monkeypatch):
     monkeypatch.setattr("app.services.summarizer.settings.TRANSCRIPT_CHUNK_CHARS", 100)
     payload = {

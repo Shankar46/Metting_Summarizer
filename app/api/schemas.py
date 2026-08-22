@@ -1,13 +1,23 @@
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ActionItem(BaseModel): 
     task: str = Field(min_length=1)
-    owner: str | None = None
-    deadline: str | None = None
+    owner: str = "Unassigned"
+    deadline: str = "Not specified"
     priority: Literal["high", "medium", "low", "not_specified"] = "not_specified"
+
+    @field_validator("owner", mode="before")
+    @classmethod
+    def default_owner(cls, value: Any) -> str:
+        return str(value or "Unassigned").strip() or "Unassigned"
+
+    @field_validator("deadline", mode="before")
+    @classmethod
+    def default_deadline(cls, value: Any) -> str:
+        return str(value or "Not specified").strip() or "Not specified"
 
 
 class KeyDecision(BaseModel):

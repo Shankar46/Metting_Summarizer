@@ -22,7 +22,9 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "data/uploads"
     MAX_UPLOAD_SIZE_MB: int = 100
     TRANSCRIPT_MAX_CHARS: int = 60000
-    TRANSCRIPT_CHUNK_CHARS: int = 14000
+    TRANSCRIPT_CHUNK_CHARS: int = 12000
+    LLM_MAX_ATTEMPTS: int = 3
+    LLM_MAX_RATE_LIMIT_WAIT_SECONDS: int = 120
 
     FRONTEND_ORIGINS: str = "http://localhost:8501,http://127.0.0.1:8501"
 

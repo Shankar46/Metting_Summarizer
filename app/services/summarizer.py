@@ -88,7 +88,55 @@ class MeetingSummarizer:
     @staticmethod
     def _validate_response(raw: str) -> MeetingResult:
         data = MeetingSummarizer._parse_json_response(raw)
-        return MeetingResult.model_validate(data)
+        return MeetingResult.model_validate(MeetingSummarizer._normalize_response(data))
+
+    @staticmethod
+    def _normalize_response(data: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(data, dict):
+            raise ValueError("LLM response must be a JSON object.")
+
+        normalized = dict(data)
+        normalized["summary"] = str(normalized.get("summary") or "").strip() or "No summary was produced."
+
+        decisions = normalized.get("key_decisions")
+        normalized["key_decisions"] = [
+            {"description": str(item.get("description") or "").strip()}
+            for item in decisions
+            if isinstance(item, dict) and str(item.get("description") or "").strip()
+        ] if isinstance(decisions, list) else []
+
+        actions = normalized.get("action_items")
+        cleaned_actions: list[dict[str, Any]] = []
+        if isinstance(actions, list):
+            for item in actions:
+                if not isinstance(item, dict):
+                    continue
+                task = str(item.get("task") or "").strip()
+                if not task:
+                    continue
+                priority = str(item.get("priority") or "not_specified").strip()
+                cleaned_actions.append(
+                    {
+                        "task": task,
+                        "owner": str(item.get("owner") or "Unassigned").strip() or "Unassigned",
+                        "deadline": str(item.get("deadline") or "Not specified").strip() or "Not specified",
+                        "priority": priority if priority in {"high", "medium", "low"} else "not_specified",
+                    }
+                )
+        normalized["action_items"] = cleaned_actions
+
+        questions = normalized.get("open_questions")
+        normalized["open_questions"] = [
+            {"question": question}
+            for item in questions
+            if isinstance(item, dict)
+            for question in [str(item.get("question") or "").strip()]
+            if question
+            and "tea color" not in question.casefold()
+            and "joke" not in question.casefold()
+            and "humor" not in question.casefold()
+        ] if isinstance(questions, list) else []
+        return normalized
 
     @staticmethod
     def _parse_json_response(raw: str) -> dict[str, Any]:

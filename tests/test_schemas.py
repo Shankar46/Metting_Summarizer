@@ -6,8 +6,8 @@ from app.api.schemas import ActionItem, MeetingResult
 
 def test_action_item_defaults():
     item = ActionItem(task="Send deployment notes")
-    assert item.owner is None
-    assert item.deadline is None
+    assert item.owner == "Unassigned"
+    assert item.deadline == "Not specified"
     assert item.priority == "not_specified"
 
 
