@@ -1,5 +1,8 @@
 # IntelliMinutes — Meeting Summarizer Assessment
 
+> [!NOTE]
+> 🎬 **Demo**: [Watch the IntelliMinutes Demo Video](https://drive.google.com/file/d/1kR-J3v_9d5w_BHVmxh1y0qCojImf01Ct/view?usp=drive_link)
+
 IntelliMinutes converts meeting recordings into a timestamped transcript and a structured, action-oriented meeting record.
 
 The implementation is intentionally small enough for a take-home assessment while using production-minded boundaries: FastAPI API routes, a service layer, provider adapters, validated LLM output, SQLite persistence, background processing, retry handling, file validation, and automated tests.
@@ -189,10 +192,10 @@ pytest -v
   $$P_\text{rate} = \frac{N_\text{passed}}{N_\text{total}} \times 100\% = \frac{24}{24} \times 100\% = 100.0\%$$
 
 * **Total Execution Time ($T_\text{total}$):**
-  $$T_\text{total} = 2.46\text{ seconds}$$
+  $$T_\text{total} = 2.08\text{ seconds}$$
 
 * **Average Time per Test Case ($T_\text{avg}$):**
-  $$T_\text{avg} = \frac{T_\text{total}}{N_\text{total}} = \frac{2.46\text{ s}}{24} \approx 0.10\text{ seconds / test}$$
+  $$T_\text{avg} = \frac{T_\text{total}}{N_\text{total}} = \frac{2.08\text{ s}}{24} \approx 0.09\text{ seconds / test}$$
 
 * **Failure Rate ($F_\text{rate}$):**
   $$F_\text{rate} = \frac{N_\text{total} - N_\text{passed}}{N_\text{total}} \times 100\% = \frac{24 - 24}{24} \times 100\% = 0.0\%$$
