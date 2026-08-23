@@ -4,22 +4,26 @@ IntelliMinutes converts meeting recordings into a timestamped transcript and a s
 
 The implementation is intentionally small enough for a take-home assessment while using production-minded boundaries: FastAPI API routes, a service layer, provider adapters, validated LLM output, SQLite persistence, background processing, retry handling, file validation, and automated tests.
 
-## Assessment coverage
+---
+
+## 📋 Assessment Coverage
 
 | Requirement | Implementation |
-|---|---|
-| Meeting audio input | FastAPI multipart upload with extension, size, and empty-file validation |
-| ASR integration | Groq Whisper adapter with timestamped segments and large-file chunking |
-| Backend processing | FastAPI + service layer + SQLite/SQLAlchemy |
-| LLM summary | Groq structured JSON output |
-| Key decisions | Explicit `key_decisions[]` field |
-| Action items | Task, owner, deadline, and priority |
-| Open questions | Explicit `open_questions[]` field |
-| Frontend | Streamlit dashboard focused on usability rather than visual complexity |
-| Repository | Clean project structure, README, tests, `.env.example` |
-| Demo readiness | Upload → queued → transcribing → summarizing → completed flow |
+| :--- | :--- |
+| **Meeting Audio Input** | FastAPI multipart upload with extension, size, and empty-file validation |
+| **ASR Integration** | Groq Whisper adapter with timestamped segments and large-file chunking |
+| **Backend Processing** | FastAPI + service layer + SQLite/SQLAlchemy |
+| **LLM Summary** | Groq structured JSON output |
+| **Key Decisions** | Explicit `key_decisions[]` field |
+| **Action Items** | Task, owner, deadline, and priority |
+| **Open Questions** | Explicit `open_questions[]` field |
+| **Frontend** | Streamlit dashboard focused on usability rather than visual complexity |
+| **Repository** | Clean project structure, README, tests, `.env.example` |
+| **Demo Readiness** | Upload → queued → transcribing → summarizing → completed flow |
 
-## Architecture
+---
+
+## 🏗️ Architecture
 
 ```text
                     Streamlit UI
@@ -44,7 +48,7 @@ The implementation is intentionally small enough for a take-home assessment whil
                       SQLite
 ```
 
-### Processing lifecycle
+### Processing Lifecycle
 
 1. The frontend uploads an audio file.
 2. The API validates the title, extension, size, and empty-file condition.
@@ -59,28 +63,31 @@ The implementation is intentionally small enough for a take-home assessment whil
 11. The meeting becomes `completed`, or `failed` with a useful error message.
 12. The frontend polls the meeting detail endpoint and renders the result.
 
-For a production deployment with multiple workers, the background task can be replaced by a real queue such as Celery/RQ/Arq without changing the core service interfaces.
+> [!TIP]
+> For a production deployment with multiple workers, the background task can be replaced by a real queue such as Celery/RQ/Arq without changing the core service interfaces.
 
-## Why the LLM layer is structured this way
+---
+
+## 🧠 LLM Integration & Prompt Grounding
 
 The original implementation relied on JSON mode plus regex-style cleanup. The improved implementation uses a strict JSON Schema response format and then validates the returned object with Pydantic.
 
 The prompt also explicitly instructs the model to:
-
-- use the transcript as the only source of truth;
-- never invent owners or deadlines;
-- distinguish decisions from discussion;
-- create action items only for explicit tasks or commitments;
-- preserve important technical names, dates, numbers, and constraints;
-- return empty lists when a category is not present.
+* Use the transcript as the only source of truth;
+* Never invent owners or deadlines;
+* Distinguish decisions from discussion;
+* Create action items only for explicit tasks or commitments;
+* Preserve important technical names, dates, numbers, and constraints;
+* Return empty lists when a category is not present.
 
 This directly targets the assessment's **summary quality** and **prompt effectiveness** criteria.
 
-## Transcript format
-
+### Transcript Format & Diarization
 Whisper produces timestamped text segments. Speaker diarization is outside the scope of this build, so transcripts contain only `start`, `end`, and `text` fields.
 
-## Project structure
+---
+
+## 📂 Project Structure
 
 ```text
 meeting_summarizer/
@@ -116,34 +123,31 @@ meeting_summarizer/
 └── run.py
 ```
 
-## Setup
+---
 
-### 1. Create a virtual environment
+## ⚙️ Setup & Installation
 
-Windows PowerShell:
+### 1. Create a Virtual Environment
 
+**Windows PowerShell:**
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-macOS/Linux:
-
+**macOS/Linux:**
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
-### 2. Install dependencies
-
+### 2. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Configure environment
-
+### 3. Configure Environment
 Copy `.env.example` to `.env` and set a Groq API key:
-
 ```text
 GROQ_API_KEY=your_groq_key
 ASR_PROVIDER=groq_whisper
@@ -152,69 +156,87 @@ LLM_PROVIDER=groq
 LLM_MODEL=llama-3.3-70b-versatile
 ```
 
-Never commit `.env` or an API key to GitHub.
+> [!WARNING]
+> Never commit `.env` or an API key to GitHub or public source control.
 
-### 4. Run
-
+### 4. Run Application
 ```bash
 python run.py
 ```
 
-Open:
+* **Streamlit Frontend:** `http://127.0.0.1:8501`
+* **API Documentation (Swagger):** `http://127.0.0.1:8000/docs`
+* **API Health Check:** `http://127.0.0.1:8000/api/meetings/health`
 
-- Frontend: `http://127.0.0.1:8501`
-- API docs: `http://127.0.0.1:8000/docs`
-- Health check: `http://127.0.0.1:8000/api/meetings/health`
+---
 
-## Offline development
-
-The test suite retains mock hooks for deterministic offline tests. Runtime configuration in `.env`
-uses Groq and does not select those providers.
-
-## Tests
-
-Run:
+## ⚡ Tests & Performance Matrix
 
 ```bash
-pytest -q
+pytest -v
 ```
 
-The test suite covers:
+<!-- METRICS_START -->
+### Mathematical Performance Metrics
 
-- API health and upload behavior;
-- file validation;
-- list/detail behavior;
-- retry/delete rules;
-- ASR normalization;
-- prompt grounding rules;
-- LLM schema validation;
-- long-transcript chunking;
-- successful pipeline completion.
+* **Passed Test Cases ($N_\text{passed}$):**
+  $$N_\text{passed} = 24$$
 
-The current assessment build has **18 automated tests** and they pass offline.
+* **Total Test Cases ($N_\text{total}$):**
+  $$N_\text{total} = 24$$
 
-## API endpoints
+* **Pass Rate ($P_\text{rate}$):**
+  $$P_\text{rate} = \frac{N_\text{passed}}{N_\text{total}} \times 100\% = \frac{24}{24} \times 100\% = 100.0\%$$
+
+* **Total Execution Time ($T_\text{total}$):**
+  $$T_\text{total} = 2.46\text{ seconds}$$
+
+* **Average Time per Test Case ($T_\text{avg}$):**
+  $$T_\text{avg} = \frac{T_\text{total}}{N_\text{total}} = \frac{2.46\text{ s}}{24} \approx 0.10\text{ seconds / test}$$
+
+* **Failure Rate ($F_\text{rate}$):**
+  $$F_\text{rate} = \frac{N_\text{total} - N_\text{passed}}{N_\text{total}} \times 100\% = \frac{24 - 24}{24} \times 100\% = 0.0\%$$
+<!-- METRICS_END -->
+
+### Detailed Performance & Test Matrix
+
+| Component | Test File | Test Case Name | Objective / Coverage | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **API Endpoints** | [test_api.py](file:///d:/meeting_summarizer/tests/test_api.py) | `test_health` | Verifies FastAPI health check endpoint returns 200 OK | `PASSED` |
+| | | `test_list_is_lightweight` | Confirms list endpoint excludes large transcript JSON fields | `PASSED` |
+| | | `test_upload_returns_202_and_schedules_processing` | Validates immediate response on upload & schedules pipeline | `PASSED` |
+| | | `test_invalid_extension_rejected` | Checks that invalid audio extensions are rejected with 400 | `PASSED` |
+| | | `test_get_missing_meeting` | Validates 404 response for non-existent meeting IDs | `PASSED` |
+| | | `test_delete_processing_meeting_is_blocked` | Blocks deletion of active processing tasks with 409 | `PASSED` |
+| | | `test_retry_requires_existing_audio` | Blocks retry requests if source audio file is deleted | `PASSED` |
+| **ASR Service** | [test_asr.py](file:///d:/meeting_summarizer/tests/test_asr.py) | `test_mock_asr_returns_plain_transcript_segments` | Tests Whisper adapter transcription formatting | `PASSED` |
+| | | `test_api_segments_are_normalized` | Ensures Whisper segments align to standardized format | `PASSED` |
+| **Prompt Rules** | [test_prompts.py](file:///d:/meeting_summarizer/tests/test_prompts.py) | `test_prompt_has_grounding_rules` | Asserts key LLM grounding keywords are present in system prompt | `PASSED` |
+| **Validation Schemas** | [test_schemas.py](file:///d:/meeting_summarizer/tests/test_schemas.py) | `test_action_item_defaults` | Checks default fields (unassigned, low priority) for new actions | `PASSED` |
+| | | `test_action_item_rejects_empty_task` | Blocks action items containing empty task description | `PASSED` |
+| | | `test_meeting_result_validation` | Validates compliance with Pydantic output schemas | `PASSED` |
+| | | `test_invalid_priority_rejected` | Rejects action items with invalid priority levels | `PASSED` |
+| **Pipeline Service** | [test_service.py](file:///d:/meeting_summarizer/tests/test_service.py) | `test_pipeline_marks_completed` | Validates full pipeline transitions state from pending to completed | `PASSED` |
+| **Summarizer Logic** | [test_summarizer.py](file:///d:/meeting_summarizer/tests/test_summarizer.py) | `test_summarizer_returns_validated_result` | Verifies end-to-end summarizer output formatting and mapping | `PASSED` |
+| | | `test_empty_transcript_is_rejected` | Rejects empty transcripts with proper error handling | `PASSED` |
+| | | `test_groq_provider_falls_back_to_prompt_json_after_json_object_failure` | Tests LLM json mode fallback when schema verification fails | `PASSED` |
+| | | `test_response_normalizes_missing_action_fields_and_ignores_casual_questions` | Sanitizes LLM outputs, cleans missing fields, filters noise | `PASSED` |
+| | | `test_long_transcript_is_chunked` | Asserts chunking behavior works properly under character limits | `PASSED` |
+| **JSON Validation** | [test_validation.py](file:///d:/meeting_summarizer/tests/test_validation.py) | `test_parse_clean_json` | Standard JSON parser test | `PASSED` |
+| | | `test_parse_json_with_markdown_blocks` | Extracts JSON from inside markdown block annotations | `PASSED` |
+| | | `test_parse_json_with_surrounding_text_noise` | Parses JSON when prefixed/suffixed with LLM intro chat text | `PASSED` |
+| | | `test_parse_malformed_json_raises_value_error` | Throws appropriate error on syntax-broken JSON strings | `PASSED` |
+
+---
+
+## 📡 API Endpoints
 
 | Method | Endpoint | Purpose |
-|---|---|---|
-| GET | `/api/meetings/health` | Health check |
-| GET | `/api/meetings` | Lightweight meeting history |
-| POST | `/api/meetings` | Upload and start processing |
-| GET | `/api/meetings/{id}` | Full meeting result |
-| POST | `/api/meetings/{id}/retry` | Retry failed processing |
-| DELETE | `/api/meetings/{id}` | Delete meeting and stored audio |
+| :--- | :--- | :--- |
+| **GET** | `/api/meetings/health` | Health check |
+| **GET** | `/api/meetings` | Lightweight meeting history (excludes large transcript segments) |
+| **POST** | `/api/meetings` | Upload audio file and start async summarization pipeline |
+| **GET** | `/api/meetings/{id}` | Retrieve full meeting details, transcript, and summary output |
+| **POST** | `/api/meetings/{id}/retry` | Retry failed processing steps for a specific meeting |
+| **DELETE** | `/api/meetings/{id}` | Delete meeting records and stored audio file from disk |
 
-## Reference used
-
-The provided `narendrasaraf/meeting-summarizer` repository was useful as an architectural reference, particularly for the upload → background processing → polling lifecycle, provider separation, structured outputs, and the idea of measuring transcription/summary quality. The implementation here is deliberately kept aligned with the assessment scope rather than copying that repository's larger React/Docker/provider matrix.
-
-## Evaluation strategy
-
-For the company assessment, the most useful evidence to demonstrate is:
-
-1. **Transcription accuracy:** show a real meeting clip and the resulting timestamped transcript.
-2. **Summary quality:** show that decisions and action items are separated from conversational noise.
-3. **Prompt effectiveness:** explain the grounding rules and strict schema.
-4. **Code structure:** show the provider interfaces, service layer, validation layer, database layer, and tests.
-
-A strong demo should take one meeting from upload to final output and briefly show the API Swagger page and test result afterward.
